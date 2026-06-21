@@ -1,0 +1,37 @@
+name: Build Windows EXE on Mac
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: 1. 코드 가져오기
+      uses: actions/checkout@v4
+
+    - name: 2. 파이썬 설치
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    # [핵심 추가] FFmpeg 자동 설치 단계
+    - name: 3. FFmpeg 설치하기
+      uses: FedericoCarboni/setup-ffmpeg@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 4. 필수 라이브러리 설치
+      run: |
+        pip install yt-dlp beautifulsoup4 requests pyinstaller
+
+    - name: 5. EXE 컴파일
+      run: |
+        pyinstaller -w -F extractor.py
+
+    - name: 6. 결과물 저장
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows-Music-Extractor
+        path: |
+          dist/extractor.exe
